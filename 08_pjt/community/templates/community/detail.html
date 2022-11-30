@@ -1,0 +1,1084 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+  <style>
+
+    .comment {
+      margin-bottom: 10px;
+
+    }
+    .like_form {
+      display: inline-block;
+    }
+    .delete_form {
+      display: inline-block;
+    }
+    .update_form {
+      display: inline-block;
+    }
+    .flex {
+      display: flex;
+    }
+    .form_hide {
+      display: none;
+    }
+    .like {
+      color: crimson;
+    }
+
+    .btn {
+      box-sizing:border-box;
+      padding-right: 0px;
+      padding-bottom: 0px;
+      padding-top:0px;
+    }
+    .tail-font {
+      font-size: 12px;
+      color: #979797;
+      text-decoration-line: none;
+    }
+    .submit {
+      margin-right:10px;
+      background-color:transparent;
+      border:none;
+      
+    }
+    .submit-font {
+      font-size: 16px;
+      font-weight:bold;
+      color: #979797;
+      text-decoration-line: none;
+    }
+    .margin {
+      font-size: 16px;
+      font-weight:bold;
+      color: #979797;
+      text-decoration-line: none;
+      margin-top: 1px;
+    }
+    .username {
+      display: inline-block;
+      margin-bottom: 0px;
+      font-weight:bold;
+      line-height: 120%;
+    }
+    .litag {
+      list-style: none;
+    }
+    .textarea {
+      width: 100%;
+      display: block;
+    }
+
+  </style>
+
+  <h2 class="text-center">DETAIL</h2>
+  <h3>{{ review.pk }} 번째 글</h3>
+  <hr>
+  <p>제목: {{ review.title }}</p>
+  <p>영화 제목: {{ review.movie_title }}</p>
+  <p>내용: {{ review.content }}</p>
+  <p>평점: {{ review.rank }}</p>
+  <p>작성 시각: {{ review.created_at }}</p>
+  <p>수정 시각: {{ review.updated_at }}</p>
+  <hr>
+  <h4>댓글 목록</h4>
+  {% if comments|length %}
+    <p><b><span id="comments_count">{{ comments_count }}</span>개의 댓글이 있습니다.</b></p>
+  {% endif %}
+  <hr>
+  <div id="comments-div">
+    {% for comment in comments %}
+      <div>
+        <div class="comments">
+          <p class="username">{{ comment.user }}</p>
+          
+          
+          <form class="like_form" data-review-id="{{ review.pk }}" data-comment-id="{{ comment.pk }}">
+            {% if request.user in comment.like_users.all  %}
+            <button class="btn btn-link"><i id="comment-like-btn-{{ comment.pk }}" class="fas fa-heart fa-1x like" ></i></button>
+            {% else %}
+            <button class="btn btn-link"><i id="comment-like-btn-{{ comment.pk }}" class="far fa-heart fa-1x like" ></i></button>
+            {% endif %}
+          </form>
+          <span class="like" id="comment_like_users_count-{{ comment.pk }}">{{ comment.like_users.count }}</span>
+          
+
+          <p class="comment" id="comment-{{ comment.pk }}"> {{ comment.content }}</p>
+
+          
+
+
+          {% comment %} 댓글 수정 {% endcomment %}
+          {% if request.user == comment.user %}
+            <form class="update_form" data-review-id="{{ review.pk }}" data-comment-id="{{ comment.pk }}" data-comment-content="{{ comment.content }}">
+              
+              {% csrf_token %}
+              <textarea style="display:none;" rows="4" class="textarea"></textarea>
+
+              <div class="flex">
+                <button style="display:none;" class="submit"><a class="submit-font">등록</a></button>
+                <a class="comment tail-font" >수정</a>
+              </div>
+              
+            </form>
+
+          {% else %}
+            <form class="form_hide" data-comment-id="{{ comment.pk }}"></form>
+            
+          {% endif %}
+          
+          {% comment %} 대댓글 작성 {% endcomment %}
+          <a class="comment tail-font" >답글쓰기</a>
+
+          {% comment %} 댓글 삭제 {% endcomment %}
+          {% if request.user == comment.user %}
+            <form class="delete_form" data-comment-id="{{ comment.pk }}">
+              <button class="submit"><a class="comment tail-font" >삭제</a></button>
+            </form>
+          {% else %}
+            <form class="form_hide" data-comment-id="{{ comment.pk }}"></form>
+          {% endif %}
+          
+          <hr>
+
+
+          <ul>
+            {% for cocomment in comment.child_comment.all %}
+              <li class="litag">
+                <p class="comment username">{{ cocomment.user }}</p> 
+                
+
+
+                <form class="like_form" data-review-id="{{ review.pk }}" data-comment-id="{{ cocomment.pk }}">
+                  {% if request.user in cocomment.like_users.all  %}
+                  <button class="btn btn-link"><i id="comment-like-btn-{{ cocomment.pk }}" class="fas fa-heart fa-1x like" ></i></button>
+                  {% else %}
+                  <button class="btn btn-link"><i id="comment-like-btn-{{ cocomment.pk }}" class="far fa-heart fa-1x like" ></i></button>
+                  {% endif %}
+                </form>
+                <span class="like" id="comment_like_users_count-{{ cocomment.pk }}">{{ cocomment.like_users.count }}</span>
+
+                
+                <p class="comment" id="comment-{{ cocomment.pk }}">{{ cocomment.content }}</p>
+                {% if request.user == cocomment.user %}
+
+                  {% comment %} 대댓글 수정 {% endcomment %}
+                  <form class="update_form"  data-review-id="{{ review.pk }}" data-comment-id="{{ cocomment.pk }}" data-comment-content="{{ cocomment.content }}">
+                    
+                    {% csrf_token %}
+                    <textarea style="display:none;" rows="4" class="textarea"></textarea>
+
+                    <div class="flex">
+                      <button style="display:none;" class="submit"><a class="submit-font">등록</a></button>
+                      <a class="comment tail-font" >수정</a>
+                    </div>
+                  </form>
+
+                  <form class="delete_form" data-comment-id="{{ cocomment.pk }}">
+                    <button class="submit"><a class="comment tail-font" >삭제</a></button>
+                  </form>
+
+
+                {% else %}
+                  <form class="form_hide" data-comment-id="{{ comment.pk }}"></form>
+                  <form class="form_hide" data-comment-id="{{ comment.pk }}"></form>
+                {% endif %}
+                <hr>
+                
+              
+              </li>
+            {% endfor %}
+          </ul>
+          
+          <form style="display:none;" data-review-id="{{ review.pk }}" data-comment-id="{{ comment.pk }}">
+            {% csrf_token %}
+            <textarea rows="4" class="textarea"></textarea>
+              
+            <button class="submit" style="padding-right:2px;"><a class="submit-font">등록</a></button>
+            <a class="margin">취소</a>
+            <hr>
+          </form>
+
+          
+        </div>
+        
+      </div>
+    {% empty %}
+      <p><b>댓글이 없습니다.</b></p>
+    {% endfor %}
+  </div>
+  {% if user.is_authenticated %}
+
+    <form id="comment_form" data-review-id="{{ review.pk }}">
+      {% csrf_token %}
+      <textarea rows="4" class="textarea"></textarea>
+            
+      <button class="submit"><a class="submit-font">등록</a></button>
+      
+    </form>
+
+
+  {% else %}
+    <a href="{% url 'accounts:login' %}">[댓글을 작성하려면 로그인하세요.]</a>
+  {% endif %}
+  <br>
+  <a href="{% url 'community:index' %}">[back]</a>
+
+
+
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const commentsCountSpan = document.querySelector('#comments_count')
+    let commentsCount = commentsCountSpan.innerText
+    const likeFormTags = document.querySelectorAll(".like_form")
+    
+    likeFormTags.forEach((likeForm) => {
+      likeForm.addEventListener('submit', function (event) {
+        event.preventDefault()
+        const reviewId = event.target.dataset.reviewId
+        const commentId = event.target.dataset.commentId
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+        const url = `/community/${reviewId}/comments/${commentId}/`
+        axios({
+          method: 'post',
+          url,
+          headers: {'X-CSRFToken': csrftoken},
+        })
+          .then((response) => {
+            const likeBtn = document.querySelector(`#comment-like-btn-${commentId}`)
+            if (response.data.is_liked === true) {
+              likeBtn.className = 'fas fa-heart fa-1x like'
+            } else {
+              likeBtn.className = 'far fa-heart fa-1x like'
+            }
+            const commentLikeUsersSpan = document.querySelector(`#comment_like_users_count-${commentId}`)
+            const likeCount = response.data.like_users_count
+            commentLikeUsersSpan.innerText = likeCount
+          })
+        
+      })
+    })
+
+    const deleteFormTags = document.querySelectorAll(".delete_form")
+    deleteFormTags.forEach((deleteForm) => {
+      deleteForm.addEventListener('submit', function (event) {
+        event.preventDefault()
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+        const commentId = event.target.dataset.commentId
+        const url = `/community/comments/delete/${commentId}/`
+        axios({
+          method: 'post',
+          url,
+          headers: {'X-CSRFToken': csrftoken},
+        })
+        .then((response) => {
+          deleteForm.parentNode.parentNode.removeChild(deleteForm.parentNode)
+          const commentsCountSpan = document.querySelector('#comments_count')
+          commentsCount -= 1
+          commentsCountSpan.innerText = commentsCount
+        })
+      })
+    })
+
+
+
+    
+    // 댓글 수정
+    const updateFormTags = document.querySelectorAll(".update_form")
+    updateFormTags.forEach((updateForm) => {
+      console.log(updateForm.childNodes)
+      const updateDiv = updateForm.childNodes[5]
+      const updateA = updateDiv.childNodes[3]
+      const submit = updateDiv.childNodes[1]
+      const textArea = updateForm.childNodes[3]
+      console.log(updateDiv.childNodes)
+      updateA.addEventListener('click', function(event){
+        const comment = document.querySelector(`#comment-${updateForm.dataset.commentId}`)
+        if (textArea.style.display === "none")  {
+
+          textArea.value = comment.innerText
+          comment.style.display = "none"
+          updateForm.style.display = "block"
+          textArea.style.display = "block"
+          submit.style.display = "block"
+          updateA.className = "submit-font"
+          updateA.className += "\u00a0 margin"
+          updateA.innerText = "취소"
+        } else {
+
+          comment.style.display = "block"
+          updateForm.style.display = "inline-block"
+          textArea.style.display = "none"
+          submit.style.display = "none"
+          updateA.className = "comment tail-font"
+          updateA.innerText = "수정"
+        }
+      })
+
+      updateForm.addEventListener('submit', function (event) {
+        event.preventDefault()
+        const reviewId = event.target.dataset.reviewId
+        const commentId = event.target.dataset.commentId
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+        const url = `/community/${reviewId}/comments/${commentId}/update/`
+        let data = new FormData()
+        data.append('content', event.target.childNodes[3].value)
+        axios({
+          method: "post",
+          url,
+          data,
+          headers: {'X-CSRFToken': csrftoken},
+        })
+        .then((response) => {
+          
+            const comment = document.querySelector(`#comment-${updateForm.dataset.commentId}`)
+            if (textArea.value.trim() != '') {
+              comment.innerText = response.data.comment_content
+              comment.style.display = "block"
+              updateForm.style.display = "inline-block"
+              textArea.style.display = "none"
+              submit.style.display = "none"
+              updateA.className = "comment tail-font"
+              updateA.innerText = "수정"
+            }
+            
+          
+          
+        })
+      })
+    })
+
+
+
+
+
+
+    // 기존에 작성되었던 댓글들의 기능
+    const commentTags = document.querySelectorAll(".comments")
+    commentTags.forEach(commentTag => {
+
+
+
+      // 대댓글 작성
+      const coCreateA = commentTag.childNodes[11]
+      const coCreateForm = commentTag.childNodes[19]
+      const coCreateCancelA = coCreateForm.childNodes[7]
+
+      coCreateA.addEventListener('click', function(event){
+        console.log(coCreateForm.childNodes)
+        if (coCreateForm.style.display === "none")  {
+          coCreateForm.style.display = "block"
+          coCreateA.style.display = "none"
+        } else {
+          coCreateForm.style.display = "none"
+        }
+      })
+
+      coCreateCancelA.addEventListener('click', function(event) {
+        coCreateForm.style.display = "none"
+        coCreateA.style.display = "inline-block"
+      })
+
+      console.log(commentTag.childNodes)
+      coCreateForm.addEventListener("submit", function(event){
+        event.preventDefault()
+        const reviewId = event.target.dataset.reviewId
+        const commentId = event.target.dataset.commentId
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+        const url = `/community/${reviewId}/comments/${commentId}/create/`
+        let data = new FormData()
+        console.log(event.target.childNodes[3].value)
+        data.append('content', event.target.childNodes[3].value)
+        axios({
+          method: "post",
+          url,
+          data,
+          headers: {'X-CSRFToken': csrftoken},
+        })
+          .then((response) => {
+            if (event.target.childNodes[3].value.trim() != '') {
+              
+            coCreateA.style.display = "inline-block"
+            const ulTag = commentTag.childNodes[17]
+            const liTag = document.createElement("li")
+            liTag.className = "litag"
+            const usernameP = document.createElement("p")
+
+            const updateA = document.createElement("a")
+            const updateTextArea = document.createElement("textarea")
+            const updateDiv = document.createElement("div")
+            const updateSubmitA = document.createElement("a")
+            const updateSubmit = document.createElement("button")
+            const updateForm = document.createElement("form")
+            const updateCancelA = document.createElement("a")
+
+            const deleteA = document.createElement("a")
+            const deleteSubmit = document.createElement("button")
+            const deleteForm = document.createElement("form")
+            const contentP = document.createElement("p")
+            const hrTag = document.createElement("hr")
+            usernameP.className = 'comment username'
+            usernameP.innerText = `${response.data.cocomment_user}`
+
+            updateA.className = 'comment tail-font'
+            updateA.innerText = '수정'
+            updateTextArea.className = 'textarea'
+            updateTextArea.setAttribute('rows', '4')
+            updateDiv.className = 'flex'
+            updateSubmitA.className = 'submit-font'
+            updateSubmitA.innerText = '등록'
+            updateSubmit.className = 'submit'
+            updateCancelA.className = 'submit-font'
+            updateCancelA.className += '\u00a0 margin'
+            
+            updateCancelA.innerText = '취소'
+            updateSubmit.appendChild(updateSubmitA)
+            updateDiv.appendChild(updateSubmit)
+            updateDiv.appendChild(updateCancelA)
+            updateForm.className = 'update_form'
+            updateForm.style = 'display:none;'
+            updateForm.setAttribute('data-review-id', response.data.review_pk)
+            updateForm.setAttribute('data-comment-id', response.data.cocomment_pk)
+            updateForm.appendChild(updateTextArea)
+            updateForm.appendChild(updateDiv)
+
+            deleteA.className = 'comment tail-font'
+            deleteA.innerText = '삭제'
+            deleteSubmit.className = 'submit'
+            deleteSubmit.appendChild(deleteA)
+            deleteForm.className = 'delete_form'
+            deleteForm.setAttribute('data-comment-id', response.data.cocomment_pk)
+            deleteForm.appendChild(deleteSubmit)
+            contentP.className = 'comment'
+            contentP.innerText = `${response.data.cocomment_content}`
+            
+            
+            liTag.appendChild(usernameP)
+            ulTag.appendChild(liTag)
+            coCreateForm.style.display = "none"
+            event.target.reset()
+
+
+
+            
+            const coLikeForm = document.createElement('form')
+            coLikeForm.className = 'like_form'
+            coLikeForm.setAttribute('data-review-id', reviewId)
+            coLikeForm.setAttribute('data-comment-id', response.data.cocomment_pk)
+
+            const coLikeBtn = document.createElement('button')
+            const coLikeI = document.createElement('i')
+            coLikeBtn.className = 'btn btn-link'
+            coLikeI.className = 'far fa-heart fa-1x like'
+            coLikeBtn.appendChild(coLikeI)
+            coLikeForm.appendChild(coLikeBtn)
+            liTag.appendChild(coLikeForm)
+
+            const coLikeCountSpan = document.createElement('span')
+            coLikeCountSpan.className = 'like'
+            coLikeCountSpan.id = `comment_like_users_count-${response.data.cocomment_pk}`
+            coLikeCountSpan.innerText = ' 0'
+
+            liTag.appendChild(coLikeCountSpan)
+            liTag.appendChild(contentP)
+            liTag.appendChild(updateForm)
+            liTag.appendChild(updateA)
+            liTag.appendChild(deleteForm)
+            liTag.appendChild(hrTag)
+
+
+            const commentsCountSpan = document.querySelector('#comments_count')
+            commentsCount = response.data.comments_count + 1
+            commentsCountSpan.innerText = commentsCount
+
+            
+            
+
+            // 새로 작성한 댓글 수정
+            updateA.addEventListener('click', function(event){
+              console.log(commentTag.childNodes)
+              if (updateForm.style.display === "none")  {
+                updateTextArea.value = contentP.innerText
+                updateForm.style.display = "block"
+                contentP.style.display = "none"
+                updateA.style.display = "none"
+              }
+            })
+
+            updateCancelA.addEventListener('click', function(event){
+              console.log(commentTag.childNodes)
+              if (updateForm.style.display === "block")  {
+                updateForm.style.display = "none"
+                contentP.style.display = "block"
+                updateA.style.display = "inline-block"
+              }
+            })
+
+            updateForm.addEventListener('submit', function (event) {
+              
+              event.preventDefault()
+              const reviewId = event.target.dataset.reviewId
+              const commentId = event.target.dataset.commentId
+              const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+              const url = `/community/${reviewId}/comments/${commentId}/update/`
+              let data = new FormData()
+              data.append('content', updateTextArea.value)
+              axios({
+                method: "post",
+                url,
+                data,
+                headers: {'X-CSRFToken': csrftoken},
+              })
+              .then((response) => {
+                if (updateTextArea.value.trim() != '') {
+                  contentP.innerText = response.data.comment_content
+                  updateForm.style.display = "none"
+                  contentP.style.display = "block"
+                  updateA.style.display = "inline-block"
+                }
+                
+                
+              })
+            })
+
+
+
+
+            // 새로 작성한 대댓글의 좋아요
+            coLikeForm.addEventListener('submit', function (event) {
+              event.preventDefault()
+              const reviewId = event.target.dataset.reviewId
+              const commentId = event.target.dataset.commentId
+              const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+              const url = `/community/${reviewId}/comments/${commentId}/`
+              axios({
+                method: 'post',
+                url,
+                headers: {'X-CSRFToken': csrftoken},
+              })
+              .then((response) => {
+
+                if (response.data.is_liked === true) {
+                  coLikeI.className = 'fas fa-heart fa-1x like'
+                } else {
+                  coLikeI.className = 'far fa-heart fa-1x like'
+                }
+                const likeCount = response.data.like_users_count
+                coLikeCountSpan.innerText = ' ' + likeCount
+              })
+            })
+
+
+
+            // 새로 작성한 대댓글의 삭제
+            deleteForm.addEventListener('submit', function (event) {
+              event.preventDefault()
+              const commentId = event.target.dataset.commentId
+              const url = `/community/comments/delete/${commentId}/`
+              axios({
+                method: 'post',
+                url,
+                headers: {'X-CSRFToken': csrftoken},
+              })
+              .then((response) => {
+                liTag.parentNode.removeChild(liTag)
+                const commentsCountSpan = document.querySelector('#comments_count')
+                commentsCount -= 1
+                commentsCountSpan.innerText = commentsCount
+              })
+            })
+          }
+          })
+          .catch(error => {
+            console.log(error.response)
+          })
+      })
+    })
+
+
+
+
+
+    // 댓글 새로 작성
+    const commentsDiv = document.querySelector('#comments-div')
+    const commentFormTag = document.querySelector('#comment_form')
+    commentFormTag.addEventListener("submit", function(event){
+      event.preventDefault()
+      const reviewId = event.target.dataset.reviewId
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+      const url = `/community/${reviewId}/comments/create/`
+      let data = new FormData()
+
+      data.append('content', event.target.childNodes[3].value)
+      axios({
+        method: "post",
+        url,
+        data,
+        headers: {'X-CSRFToken': csrftoken},
+      })
+        .then((response) => {
+          if (event.target.childNodes[3].value.trim() != '') {
+            
+          
+          const divTag = document.createElement('div')
+          const usernameP = document.createElement("p")
+          const createA = document.createElement("a")
+
+
+          const updateA = document.createElement("a")
+          const updateTextArea = document.createElement("textarea")
+          const updateDiv = document.createElement("div")
+          const updateSubmitA = document.createElement("a")
+          const updateSubmit = document.createElement("button")
+          const updateForm = document.createElement("form")
+          const updateCancelA = document.createElement("a")
+
+
+          const deleteA = document.createElement("a")
+          const deleteSubmit = document.createElement("button")
+          const deleteForm = document.createElement("form")
+          const contentP = document.createElement("p")
+          const hrTag = document.createElement("hr")
+          const ulTag = document.createElement("ul")
+          commentsDiv.appendChild(divTag)
+          usernameP.className = 'comment username'
+          usernameP.innerText = `${response.data.comment_user}`
+          divTag.appendChild(usernameP)
+          createA.className = 'comment tail-font'
+          createA.innerText = '답글쓰기'
+          deleteA.className = 'comment tail-font'
+          deleteA.innerText = '삭제'
+          deleteSubmit.className = 'submit'
+          deleteSubmit.appendChild(deleteA)
+          deleteForm.className = 'delete_form'
+          deleteForm.setAttribute('data-comment-id', response.data.comment_pk)
+          deleteForm.appendChild(deleteSubmit)
+          contentP.className = 'comment'
+          contentP.innerText = `${response.data.comment_content}`
+
+
+          updateA.className = 'comment tail-font'
+          updateA.innerText = '수정\u00a0'
+          updateTextArea.className = 'textarea'
+          updateTextArea.setAttribute('rows', '4')
+          updateDiv.className = 'flex'
+          updateSubmitA.className = 'submit-font'
+          updateSubmitA.innerText = '등록'
+          updateSubmit.className = 'submit'
+          updateCancelA.className = 'submit-font'
+          updateCancelA.className += '\u00a0 margin'
+          updateCancelA.innerText = '취소'
+          updateSubmit.appendChild(updateSubmitA)
+          updateDiv.appendChild(updateSubmit)
+          updateDiv.appendChild(updateCancelA)
+          updateForm.className = 'update_form'
+          updateForm.style = 'display:none;'
+          updateForm.setAttribute('data-review-id', response.data.review_pk)
+          updateForm.setAttribute('data-comment-id', response.data.comment_pk)
+          updateForm.appendChild(updateTextArea)
+          updateForm.appendChild(updateDiv)
+
+
+
+          
+          event.target.reset()
+
+          const LikeForm = document.createElement('form')
+          LikeForm.className = 'like_form'
+          LikeForm.setAttribute('data-review-id', reviewId)
+          LikeForm.setAttribute('data-comment-id', response.data.comment_pk)
+
+          const LikeBtn = document.createElement('button')
+          const LikeI = document.createElement('i')
+          LikeBtn.className = 'btn btn-link'
+          LikeI.className = 'far fa-heart fa-1x like'
+          LikeBtn.appendChild(LikeI)
+          LikeForm.appendChild(LikeBtn)
+          divTag.appendChild(LikeForm)
+
+          const LikeCountSpan = document.createElement('span')
+          LikeCountSpan.className = 'like'
+          LikeCountSpan.id = `comment_like_users_count-${response.data.comment_pk}`
+          LikeCountSpan.innerText = ' 0'
+          divTag.appendChild(LikeCountSpan)
+          divTag.appendChild(contentP)
+          divTag.appendChild(updateForm)
+          divTag.appendChild(updateA)
+          divTag.appendChild(createA)
+          divTag.appendChild(deleteForm)
+          divTag.appendChild(hrTag)
+          divTag.appendChild(ulTag)
+
+
+
+
+          // 새로 작성된 댓글 수정
+          updateA.addEventListener('click', function(event){
+            
+            if (updateForm.style.display === "none")  {
+              updateTextArea.value = contentP.innerText
+              updateForm.style.display = "block"
+              contentP.style.display = "none"
+              updateA.style.display = "none"
+            }
+          })
+
+          updateCancelA.addEventListener('click', function(event){
+            if (updateForm.style.display === "block")  {
+              updateForm.style.display = "none"
+              contentP.style.display = "block"
+              updateA.style.display = "inline-block"
+            }
+          })
+
+          updateForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            const reviewId = event.target.dataset.reviewId
+            const commentId = event.target.dataset.commentId
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+            const url = `/community/${reviewId}/comments/${commentId}/update/`
+            let data = new FormData()
+            data.append('content', updateTextArea.value)
+            axios({
+              method: "post",
+              url,
+              data,
+              headers: {'X-CSRFToken': csrftoken},
+            })
+            .then((response) => {
+              if (updateTextArea.value.trim() != '') {
+                contentP.innerText = response.data.comment_content
+                updateForm.style.display = "none"
+                contentP.style.display = "block"
+                updateA.style.display = "inline-block"
+              }
+              
+            })
+          })
+
+
+
+
+
+          // 새로 작성한 댓글의 좋아요
+          LikeForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            const reviewId = event.target.dataset.reviewId
+            const commentId = event.target.dataset.commentId
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+            const url = `/community/${reviewId}/comments/${commentId}/`
+            axios({
+              method: 'post',
+              url,
+              headers: {'X-CSRFToken': csrftoken},
+            })
+            .then((response) => {
+
+              if (response.data.is_liked === true) {
+                LikeI.className = 'fas fa-heart fa-1x like'
+              } else {
+                LikeI.className = 'far fa-heart fa-1x like'
+              }
+
+              const likeCount = response.data.like_users_count
+              LikeCountSpan.innerText = ' ' + likeCount
+            })
+          })
+
+          // 새로 작성한 댓글의 삭제
+          deleteForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            const commentId = event.target.dataset.commentId
+            const url = `/community/comments/delete/${commentId}/`
+            axios({
+              method: 'post',
+              url,
+              headers: {'X-CSRFToken': csrftoken},
+            })
+            .then((response) => {
+              divTag.parentNode.removeChild(divTag)
+              const commentsCountSpan = document.querySelector('#comments_count')
+              commentsCount -= 1
+              commentsCountSpan.innerText = commentsCount
+            })
+          })
+
+          // 새로 작성한 댓글 개수 갱신
+          const commentsCountSpan = document.querySelector('#comments_count')
+          commentsCount = response.data.comments_count + 1
+          commentsCountSpan.innerText = commentsCount
+
+
+
+          // 새로 작성한 댓글의 대댓글 작성
+          const coCreateForm = document.createElement('form')
+          const coTextArea = document.createElement('textarea')
+          const coCreateButton = document.createElement('button')
+          const coCreateA = document.createElement('a')
+          const coCreateCancelA = document.createElement('a')
+          const coHr = document.createElement('hr')
+          coCreateForm.setAttribute('data-review-id', reviewId)
+          coCreateForm.setAttribute('data-comment-id', response.data.comment_pk)
+          coTextArea.className = 'textarea'
+          coTextArea.setAttribute('rows','4')
+          coCreateButton.className = 'submit'
+          coCreateA.className = 'submit-font'
+          coCreateA.innerText = '등록'
+          coCreateCancelA.className = 'margin'
+          coCreateCancelA.innerText = '취소'
+
+          coCreateButton.appendChild(coCreateA)
+          coCreateForm.appendChild(coTextArea)
+          coCreateForm.appendChild(coCreateButton)
+          coCreateForm.appendChild(coCreateCancelA)
+          coCreateForm.appendChild(coHr)
+          coCreateForm.style = 'display:none;'
+          divTag.appendChild(coCreateForm)
+          
+
+          createA.addEventListener('click', function(event) {
+            if (coCreateForm.style.display === "none")  {
+              coCreateForm.style.display = "block"
+              createA.style.display = "none"
+            } else {
+              coCreateForm.style.display = "none"
+            }
+          })
+
+          coCreateCancelA.addEventListener('click', function(event) {
+            coCreateForm.style.display = "none"
+            createA.style.display = "inline-block"
+          })
+
+
+
+          coCreateForm.addEventListener("submit", function(event){
+            event.preventDefault()
+            const reviewId = event.target.dataset.reviewId
+            const commentId = event.target.dataset.commentId
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+            const url = `/community/${reviewId}/comments/${commentId}/create/`
+            let data = new FormData()
+
+            data.append('content', event.target.childNodes[0].value)
+            axios({
+              method: "post",
+              url,
+              data,
+              headers: {'X-CSRFToken': csrftoken},
+            })
+              .then((response) => {
+                if (event.target.childNodes[0].value.trim() != '') {
+                  
+                createA.style.display = "inline-block"
+                console.log(divTag.childNodes)
+                const ulTag = divTag.childNodes[9]
+                const liTag = document.createElement("li")
+                liTag.className = "litag"
+                const usernameP = document.createElement("p")
+
+
+                const updateA = document.createElement("a")
+                const updateTextArea = document.createElement("textarea")
+                const updateDiv = document.createElement("div")
+                const updateSubmitA = document.createElement("a")
+                const updateSubmit = document.createElement("button")
+                const updateForm = document.createElement("form")
+                const updateCancelA = document.createElement("a")
+
+
+
+
+                const deleteA = document.createElement("a")
+                const deleteSubmit = document.createElement("button")
+                const deleteForm = document.createElement("form")
+                const contentP = document.createElement("p")
+                const hrTag = document.createElement("hr")
+                usernameP.className = 'comment username'
+                usernameP.innerText = `${response.data.cocomment_user}`
+                deleteA.className = 'comment tail-font'
+                deleteA.innerText = '삭제'
+                deleteSubmit.className = 'submit'
+                deleteSubmit.appendChild(deleteA)
+                deleteForm.className = 'delete_form'
+                deleteForm.setAttribute('data-comment-id', response.data.cocomment_pk)
+                deleteForm.appendChild(deleteSubmit)
+                contentP.className = 'comment'
+                contentP.innerText = `${response.data.cocomment_content}`
+
+
+                updateA.className = 'comment tail-font'
+                updateA.innerText = '수정\u00a0'
+                updateTextArea.className = 'textarea'
+                updateTextArea.setAttribute('rows', '4')
+                updateDiv.className = 'flex'
+                updateSubmitA.className = 'submit-font'
+                updateSubmitA.innerText = '등록'
+                updateSubmit.className = 'submit'
+                updateCancelA.className = 'submit-font'
+                updateCancelA.className += '\u00a0 margin'
+                updateCancelA.innerText = '취소'
+                updateSubmit.appendChild(updateSubmitA)
+                updateDiv.appendChild(updateSubmit)
+                updateDiv.appendChild(updateCancelA)
+                updateForm.className = 'update_form'
+                updateForm.style = 'display:none;'
+                updateForm.setAttribute('data-review-id', response.data.review_pk)
+                updateForm.setAttribute('data-comment-id', response.data.cocomment_pk)
+                updateForm.appendChild(updateTextArea)
+                updateForm.appendChild(updateDiv)
+                
+                
+    
+                liTag.appendChild(usernameP)
+                ulTag.appendChild(liTag)
+                coCreateForm.style.display = "none"
+                event.target.reset()
+
+
+                
+                
+                const coLikeForm = document.createElement('form')
+                coLikeForm.className = 'like_form'
+                coLikeForm.setAttribute('data-review-id', reviewId)
+                coLikeForm.setAttribute('data-comment-id', response.data.cocomment_pk)
+                
+                const coLikeBtn = document.createElement('button')
+                const coLikeI = document.createElement('i')
+                coLikeBtn.className = 'btn btn-link'
+                coLikeI.className = 'far fa-heart fa-1x like'
+                coLikeBtn.appendChild(coLikeI)
+                coLikeForm.appendChild(coLikeBtn)
+                liTag.appendChild(coLikeForm)
+                
+                const coLikeCountSpan = document.createElement('span')
+                coLikeCountSpan.className = 'like'
+                coLikeCountSpan.id = `comment_like_users_count-${response.data.cocomment_pk}`
+                coLikeCountSpan.innerText = ' 0'
+                liTag.appendChild(coLikeCountSpan)
+                liTag.appendChild(contentP)
+                liTag.appendChild(updateForm)
+                liTag.appendChild(updateA)
+                liTag.appendChild(deleteForm)
+                liTag.appendChild(hrTag)
+
+                const commentsCountSpan = document.querySelector('#comments_count')
+                commentsCount = response.data.comments_count + 1
+                commentsCountSpan.innerText = commentsCount
+
+
+
+
+                // 새로 작성한 댓글에서 작성한 대댓글의 수정
+                updateA.addEventListener('click', function(event){
+            
+                  if (updateForm.style.display === "none")  {
+                    updateTextArea.value = contentP.innerText
+                    updateForm.style.display = "block"
+                    contentP.style.display = "none"
+                    updateA.style.display = "none"
+                  }
+                })
+      
+                updateCancelA.addEventListener('click', function(event){
+                  if (updateForm.style.display === "block")  {
+                    updateForm.style.display = "none"
+                    contentP.style.display = "block"
+                    updateA.style.display = "inline-block"
+                  }
+                })
+      
+                updateForm.addEventListener('submit', function (event) {
+                  event.preventDefault()
+                  const reviewId = event.target.dataset.reviewId
+                  const commentId = event.target.dataset.commentId
+                  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+                  const url = `/community/${reviewId}/comments/${commentId}/update/`
+                  let data = new FormData()
+                  data.append('content', updateTextArea.value)
+                  axios({
+                    method: "post",
+                    url,
+                    data,
+                    headers: {'X-CSRFToken': csrftoken},
+                  })
+                  .then((response) => {
+                    if (updateTextArea.value.trim() != '') {
+                      contentP.innerText = response.data.comment_content
+                      updateForm.style.display = "none"
+                      contentP.style.display = "block"
+                      updateA.style.display = "inline-block"
+                    }
+                    
+                    
+                  })
+                })
+
+
+
+
+                // 새로 작성한 댓글에서 작성한 대댓글의 좋아요
+                coLikeForm.addEventListener('submit', function (event) {
+                  event.preventDefault()
+                  const reviewId = event.target.dataset.reviewId
+                  const commentId = event.target.dataset.commentId
+                  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+                  const url = `/community/${reviewId}/comments/${commentId}/`
+                  axios({
+                    method: 'post',
+                    url,
+                    headers: {'X-CSRFToken': csrftoken},
+                  })
+                  .then((response) => {
+    
+                    if (response.data.is_liked === true) {
+                      coLikeI.className = 'fas fa-heart fa-1x like'
+                    } else {
+                      coLikeI.className = 'far fa-heart fa-1x like'
+                    }
+                    const likeCount = response.data.like_users_count
+                    coLikeCountSpan.innerText = ' ' + likeCount
+                  })
+                })
+    
+                // 새로 작성한 댓글에서 작성한 대댓글의 삭제
+                deleteForm.addEventListener('submit', function (event) {
+                  event.preventDefault()
+                  const commentId = event.target.dataset.commentId
+                  const url = `/community/comments/delete/${commentId}/`
+                  axios({
+                    method: 'post',
+                    url,
+                    headers: {'X-CSRFToken': csrftoken},
+                  })
+                  .then((response) => {
+                    liTag.parentNode.removeChild(liTag)
+                    const commentsCountSpan = document.querySelector('#comments_count')
+                    commentsCount -= 1
+                    commentsCountSpan.innerText = commentsCount
+                    
+                  })
+                })
+              }
+              })
+              .catch(error => {
+                console.log(error.response)
+              })
+          })
+
+          
+        }
+        })
+        .catch(error => {
+          console.log(error.response)
+        })
+    })
+  </script>
+{% endblock  %}

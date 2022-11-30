@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <img src="{{ movie.poster_path }}" alt="poster_path">
+  <h1>{{ movie.title }}</h1>
+  <p>{{ movie.release_date }}</p>
+  <p>{{ movie.popularity }}</p>
+  <p>{{ movie.vote_count }}</p>
+  <p>{{ movie.vote_average }}</p>
+  {% for genre in genres %}
+    <span>{{ genre.name }}</span>
+  {% endfor %}
+
+  <p>{{ movie.overview }}</p>
+
+
+{% endblock %}

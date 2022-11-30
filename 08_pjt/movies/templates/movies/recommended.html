@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <style>
+    .recommend {
+      display: inline-block;
+    }
+    .init-form {
+      display: inline-block;
+    }
+    .submit {
+      background-color:transparent;
+      border:none;
+    }
+    .submit-font {
+      font-weight:bold;
+      color: #979797;
+      text-decoration-line: none;
+    }
+  </style>
+
+
+  <br>
+  <h1>영화 추천</h1>
+  <br>
+  <hr>
+  <br>
+  
+  <p class="recommend">회원님이 선호하는 장르 : <b><span id="searched-genres">{{ genres }}</span></b></p>
+  {% if is_exist %}
+    <form class="init-form" id="init-form">
+      {% csrf_token %}
+      <button class="submit"><a class="submit-font">초기화</a></button>
+
+    </form>
+  {% endif %}
+  
+  <br>
+  
+  {% for movie in movies %}
+    <img src="{{ movie.poster_path }}" alt="poster_path" style="height:200px;">
+    <a href="{% url 'movies:detail' movie.pk %}"><p>{{ movie.title }}</p></a>
+  {% endfor %}
+
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const initForm = document.querySelector('#init-form')
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+    initForm.addEventListener('submit', function (event) {
+      event.preventDefault()
+      axios({
+        method: 'post',
+        url: '/movies/recommended/init/',
+        headers: {'X-CSRFToken': csrftoken},
+      })
+      .then((response) => {
+        const searchedGenresSpan = document.querySelector('#searched-genres')
+        searchedGenresSpan.innerText = response.data.genres
+      })
+    })
+  </script>
+{% endblock %}

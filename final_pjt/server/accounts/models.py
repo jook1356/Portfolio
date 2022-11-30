@@ -1,0 +1,13 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from movies.models import Genre
+
+
+from django.contrib.auth.models import AbstractUser
+
+
+# Create your models here.
+class User(AbstractUser):
+    nickname = models.CharField(max_length=100)
+    new_user = models.BooleanField(default=True)
+    pass

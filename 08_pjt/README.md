@@ -1,5 +1,8 @@
 [toc]
 
+![ezgif com-gif-maker (3)](https://user-images.githubusercontent.com/45291694/205565904-7dad2d3d-7f2a-4858-a8d8-d2d48061f72a.gif)
+
+
 # pjt 08
 ## 해당 프로젝트 또한 팀원과 진행한 작은 프로젝트였으나 프로젝트가 끝나고 댓글에 더해 대댓글, 댓글 좋아요 등을 Native JavaScript로 혼자 추가로 구현해본 프로젝트입니다.
 

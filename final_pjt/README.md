@@ -2,6 +2,7 @@
 
 # README
 [![Video Label](http://img.youtube.com/vi/yl7ij-eXjHw/0.jpg)](https://youtu.be/yl7ij-eXjHw)
+
 https://youtu.be/yl7ij-eXjHw
 
 ### 1. 프로젝트 구성원

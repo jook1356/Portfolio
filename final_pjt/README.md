@@ -2,6 +2,8 @@
 
 # README
 
+https://youtu.be/yl7ij-eXjHw
+
 ### 1. 프로젝트 구성원
 
 [팀장] 이민지
